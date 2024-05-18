@@ -11,6 +11,8 @@ import speech_recognition as sr
 import pygame
 import time
 import warnings
+from simple_term_menu import TerminalMenu
+from typing import List, Dict, Tuple, Optional
 
 def ollama_generate_response(model, max_tokens, messages):
 
@@ -38,14 +40,40 @@ def ollama_generate_response(model, max_tokens, messages):
 
     return response, total_tokens, prompt_tokens, completion_tokens
 
+def speak_assitant_response(assistant_answer):
+    tmp_output_audio_file = '/tmp/tmp_output.mp3'
+    assistant_verbal_response = client.audio.speech.create(
+      model="tts-1",
+      voice="nova",
+      input=assistant_answer
+    )
+    assistant_verbal_response.stream_to_file(tmp_output_audio_file)
+    play_audio(tmp_output_audio_file)
+
+def hear_user_input(timeout=3):
+    tmp_input_audio_file = '/tmp/tmp_input.wav'
+    recording_file = record_audio(tmp_input_audio_file, timeout)
+    if recording_file == None:
+      return None
+    audio_file = open(tmp_input_audio_file, "rb")
+    transcription = client.audio.transcriptions.create(
+      model="whisper-1",
+      file=audio_file
+    )
+    return transcription.text
+
 def record_audio(file_path, timeout=3):
     recognizer = sr.Recognizer()
-    with sr.Microphone() as source:
-        print("Please say something...")
-        audio_data = recognizer.listen(source, timeout=timeout)
-        print("Recording complete.")
-        with open(file_path, "wb") as audio_file:
-            audio_file.write(audio_data.get_wav_data())
+    print("Go ahead and speak... ")
+    try:
+        with sr.Microphone() as source:
+            audio_data = recognizer.listen(source, timeout=timeout)
+    except sr.WaitTimeoutError:
+        return None
+    print("Got it.\n")
+    with open(file_path, "wb") as audio_file:
+        audio_file.write(audio_data.get_wav_data())
+    return file_path
 
 def play_audio(file_path):
     pygame.mixer.init()
@@ -54,6 +82,21 @@ def play_audio(file_path):
     # Wait until the audio is finished playing
     while pygame.mixer.music.get_busy():
         time.sleep(1)
+
+def get_multiline_input(prompt: str) -> str:
+    """Get multiline input from the user."""
+    print(f"{prompt}. Press control-d to finish.")
+    lines = []
+    while True:
+        try:
+            line = input()
+            # Check if line contains only Ctrl-D
+            if line == "\x04":
+                break
+            lines.append(line)
+        except EOFError:
+            break
+    return '\n'.join(lines)
 
 from openai import OpenAI
 
@@ -80,44 +123,44 @@ facial features.
 
 messages = [ {"role": "system", "content": system_message} ]
 
-tmp_input_audio_file = 'tmp_input.wav'
-tmp_output_audio_file = 'tmp_output.mp3'
-
 while True:
-  print("Press ENTER to speak or type 'exit' to quit.")
-  user_input = input()
-  if user_input == "exit":
-    break
+    print("Enter your choice")
+    options = ["Speak", "Type", "Exit"]
+    terminal_menu = TerminalMenu(options)
+    selected_option = terminal_menu.show()
+    print(f"Selected option: {options[selected_option]}")
+    if selected_option is None:
+        # Escape was pressed so do nothing.
+        continue
+    if options[selected_option] == "Speak":
+      user_input = hear_user_input(timeout=2)
+      if user_input is None:
+        print("No audio detected, try again.\n")
+        continue
+    elif options[selected_option] == "Type":
+      user_input = get_multiline_input("Enter your text")
+    elif options[selected_option] == "Exit":
+      print("Goodbye!")
+      break
+    else:
+      print("Invalid option selected.")
+      continue
 
-  record_audio(tmp_input_audio_file, timeout=3)
-  audio_file= open(tmp_input_audio_file, "rb")
-  transcription = client.audio.transcriptions.create(
-    model="whisper-1",
-    file=audio_file
-  )
+    #print(f"{user_input}\n\n")
 
-  print(f"{transcription.text}\n\n")
+    messages.append(
+        {"role": "user", "content": f"{user_input}"}
+    )
 
-  messages.append(
-      {"role": "user", "content": f"{transcription.text}"}
-  )
+    # response = client.chat.completions.create(
+    #   model="gpt-4o",
+    #   messages=messages
+    # )
+    # assistant_answer = response.choices[0].message.content
 
-  # response = client.chat.completions.create(
-  #   model="gpt-4o",
-  #   messages=messages
-  # )
-  # assistant_answer = response.choices[0].message.content
+    print("Processing ...\n")
+    response, total_tokens, prompt_tokens, completion_tokens = ollama_generate_response("llama3:8b", 500, messages)
+    assistant_answer = response
 
-  response, total_tokens, prompt_tokens, completion_tokens = ollama_generate_response("llama3:8b", 500, messages)
-  assistant_answer = response
-
-  print(f"{assistant_answer}\n\n")
-
-  assistant_verbal_response = client.audio.speech.create(
-    model="tts-1",
-    voice="nova",
-    input=assistant_answer
-  )
-
-  assistant_verbal_response.stream_to_file(tmp_output_audio_file)
-  play_audio(tmp_output_audio_file)
+    print(f"{assistant_answer}\n")
+    #speak_assitant_response(assistant_answer)
