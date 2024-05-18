@@ -73,14 +73,14 @@ def hear_user_input(timeout: int = 3) -> str:
     # Remove the temporary WAV file after transcription
     return transcription.text
 
-def call_ollama_api(model, chunk, summary_prompt):
+def call_ollama_api(chunk, summary_prompt):
     messages = [
         {"role": "system", "content": summary_prompt},
         {"role": "user", "content": f"{chunk}."},
     ]
 
     response, total_tokens, prompt_tokens, completion_tokens = ollama_generate_response(
-        model=model,
+        model="llama3:8b",
         max_tokens=500,
         messages=messages
     )

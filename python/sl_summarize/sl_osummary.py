@@ -8,7 +8,7 @@ import PyPDF2
 import os
 import json
 import re
-from ollama import Client
+from utils.chat_utils import call_ollama_api
 
 # Constants
 SUMMARY_PROMPT = """
@@ -51,26 +51,6 @@ def load_text(file, page_start=None, page_end=None):
         st.error(f"Error loading file: {str(e)}")
         return None, None
 
-# Function to call the Ollama API for summarization
-def call_ollama_api(chunk):
-    client = Client(host='http://localhost:11434')
-    messages = [
-        {"role": "system", "content": SUMMARY_PROMPT},
-        {"role": "user", "content": f"{chunk}."},
-    ]
-
-    try:
-        completion = client.chat(
-            model="llama3:8b",
-            messages=messages,
-            options={"temperature": 0.5}
-        )
-        response = completion['message']['content'].strip()
-    except Exception as e:
-        response = f"Error in ollama server: Error: {str(e)}"
-
-    return response.strip()
-
 # Function to split text into chunks
 def split_into_chunks(text, chunk_size, overlap):
     words = text.split()
@@ -93,7 +73,7 @@ def process_chunks(text, chunk_size, overlap):
     responses = []
 
     for chunk in chunks:
-        raw_response = call_ollama_api(chunk)
+        raw_response = call_ollama_api(chunk, SUMMARY_PROMPT)
 
         # If this chunk has a timestamp on it (e.g., like a whisper timestamp),
         # let's print it to help guide the user to the original text.

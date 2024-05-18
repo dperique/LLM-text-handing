@@ -4,6 +4,7 @@ import sys
 import json
 import re
 import os
+from utils.chat_utils import call_ollama_api
 
 # Return a string of the text from the file.
 # Handle pdf files by first extracting the text from the pdf.
@@ -27,32 +28,6 @@ def save_to_file(responses, output_file):
         for response in responses:
             file.write(response + '\n')
 
-def ollama_generate_response(model, max_tokens, messages):
-
-    from ollama import Client
-    client = Client(host='http://localhost:11434')
-
-    try:
-        completion = client.chat(
-            model=model,
-            messages=messages,
-            options={
-                "temperature": 0.5
-            }
-        )
-        response = completion['message']['content'].strip()
-    except Exception as e:
-        error_text = f"Error in ollama server: Error: {str(e)}"
-        response = error_text
-        return response, 0, 0, 0
-
-    prompt_tokens = completion['eval_count']
-    #completion_tokens = completion['prompt_eval_count']
-    completion_tokens = 0
-    total_tokens = prompt_tokens + completion_tokens
-
-    return response, total_tokens, prompt_tokens, completion_tokens
-
 # Clipboard file
 CLIPBOARD_FILE = "/tmp/clipboard.txt"
 
@@ -74,21 +49,6 @@ be on separate lines.  For example, the output will look like:
 ]
 The key and bullet point should always be on a single line.
 """
-
-def call_ollama_api(chunk):
-    messages = [
-        {"role": "system", "content": SUMMARY_PROMPT},
-        {"role": "user", "content": f"{chunk}."},
-    ]
-
-    response, total_tokens, prompt_tokens, completion_tokens = ollama_generate_response(
-        model="llama3:8b",
-        max_tokens=500,
-        messages=messages
-    )
-    # We only return the message content to match the original function's return type
-    return response.strip()
-
 
 # Change your OpenAI chat model accordingly
 
@@ -254,7 +214,7 @@ def process_chunks(input_file, output_file, chunk_size, overlap, max_width, doFo
         for chunk in chunks:
             print(f"Summarizing chunk {count} of {total_chunks}", file=sys.stderr)
             debug_print(f"Chunk:\n\n {chunk}\n\n")
-            raw_response = call_ollama_api(chunk)
+            raw_response = call_ollama_api(chunk, SUMMARY_PROMPT)
             debug_print(f"Raw response:\n\n {raw_response}\n\n")
 
             # If this chunk has a timestamp on it (e.g., like a whisper timestamp),
