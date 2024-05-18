@@ -7,7 +7,9 @@
 # conda install pyaudio
 # Goto system preferences on macos and allow terminal to use microphone.
 
+import os
 import speech_recognition as sr
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import pygame
 import time
 import warnings
