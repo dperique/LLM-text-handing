@@ -8,10 +8,6 @@
 # Goto system preferences on macos and allow terminal to use microphone.
 
 import os
-import tempfile
-import speech_recognition as sr
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
-import pygame
 import time
 import warnings
 from simple_term_menu import TerminalMenu
@@ -47,6 +43,11 @@ def speak_assitant_response(text_string):
     """
     Convert the text to speech and play it using a temporary file.
     """
+    from openai import OpenAI
+    client = OpenAI()
+    import tempfile
+    os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
+    import pygame
     # Create a temporary file
     with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as temp_audio_file:
         temp_audio_file_path = temp_audio_file.name
@@ -76,6 +77,10 @@ def hear_user_input(timeout=3):
     Record audio from the microphone and transcribe it. If we didn't gather any audio
     (e.g., the user didn't speak), return None.
     """
+    from openai import OpenAI
+    client = OpenAI()
+    import tempfile
+    import speech_recognition as sr
     recognizer = sr.Recognizer()
     print("Go ahead and speak... ")
     try:
@@ -118,10 +123,6 @@ def get_multiline_input(prompt: str) -> str:
     return '\n'.join(lines)
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
-
-# Required for using the whisper tts-1 model (and costs money so monitor your usage)
-from openai import OpenAI
-client = OpenAI()
 
 # The system message can be what you want.
 
