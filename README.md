@@ -1,6 +1,12 @@
-# LLM text handling
+<div align="center">
 
-These are programs that handle text using LLMs.  We try hard to use quality opensource (free) LLMs first and also paid models where appropriate.
+# LLM text handling
+</div>
+<div align="center">
+    <img src="logo/llm-text-handling.png" alt="termi-chat logo">
+</div>
+
+These are programs that handle text using LLMs.  We try hard to use quality opensource (e.g. llama3:8b) LLMs first and also paid models where appropriate.
 
 Before running any of the programs, do this:
 
@@ -34,8 +40,12 @@ Run it like this:
 streamlit run --server.port 8509 --server.headless True --theme.base dark sl_summarize/sl_osummary.py
 ```
 
-Then browse to [localhost:8509](localhost:8509).  You can create multiple tabs with that link so you can have
-multiple summarizations.
+Then browse to [localhost:8509](localhost:8509).  You can create multiple tabs with that link so you
+can have multiple summarizations.
+
+<div align="center">
+    <img src="logo/summarizer.png" alt="summarizer.png">
+</div>
 
 ## HTML reader
 
