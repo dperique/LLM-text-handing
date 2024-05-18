@@ -8,6 +8,7 @@ Before running any of the programs, do this:
 python -m env venv
 source ./env/bin/activate
 pip install -r requirements.txt
+export PYTHONPATH=$(pwd)/python
 ```
 
 Setup an [ollama service](https://github.com/ollama/ollama/blob/ba04afc9a45a095e09e72c1d716fdfe941d9b340/docs/linux.md#adding-ollama-as-a-startup-service-recommended) or get an openai apikey.

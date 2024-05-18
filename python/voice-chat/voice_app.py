@@ -9,7 +9,7 @@
 
 import warnings
 from simple_term_menu import TerminalMenu
-from chat_utils import hear_user_input, speak_assitant_response, ollama_generate_response, get_multiline_input
+from utils.chat_utils import hear_user_input, speak_assitant_response, ollama_generate_response, get_multiline_input
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
