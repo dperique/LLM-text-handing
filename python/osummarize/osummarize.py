@@ -34,6 +34,9 @@ CLIPBOARD_FILE = "/tmp/clipboard.txt"
 # Regex to match whisper transcripts with timestamps.
 timestamp_pattern = r'\[(\d{2}:)?\d{2}:\d{2}\.\d{3} --> (\d{2}:)?\d{2}:\d{2}\.\d{3}\]'
 
+# The youtube transcript timestamps look like (27:16) or (1:27:16)
+youtube_timestamp_pattern = r'\((\d{1,2}:)?\d{2}:\d{2}\)'
+
 # This prompt works well but you'll need to fixup the output as the LLM is not so
 # consistent with producing well formed json.
 SUMMARY_PROMPT = """
@@ -217,6 +220,8 @@ def process_chunks(input_file, output_file, chunk_size, overlap, max_width, doFo
             raw_response = call_ollama_api(chunk, SUMMARY_PROMPT)
             debug_print(f"Raw response:\n\n {raw_response}\n\n")
 
+            tmp_response = []
+
             # If this chunk has a timestamp on it (e.g., like a whisper timestamp),
             # let's print it to help guide the user to the original text.
             match = re.search(timestamp_pattern, chunk)
@@ -224,10 +229,16 @@ def process_chunks(input_file, output_file, chunk_size, overlap, max_width, doFo
                 # Print the matched timestamp
                 file.write(match.group() + '\n')
 
+            # If this chunk has a youtube timestamp on it, let's print it to help
+            # guide the user to the original text.
+            match = re.search(youtube_timestamp_pattern, chunk)
+            if match:
+                # Print the matched timestamp
+                file.write(match.group() + '\n')
+
             # Take only the lines in response that start with '"key":', strip any comma
             # that comes after a closing brace, then build an array of strings with
             # each of the values.
-            tmp_response = []
             errors_found = 0
             for line in raw_response.split('\n'):
                 if '"key":' in line:

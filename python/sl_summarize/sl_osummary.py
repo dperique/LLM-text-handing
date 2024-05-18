@@ -75,6 +75,8 @@ def process_chunks(text, chunk_size, overlap):
     for chunk in chunks:
         raw_response = call_ollama_api(chunk, SUMMARY_PROMPT)
 
+        tmp_response = []
+
         # If this chunk has a timestamp on it (e.g., like a whisper timestamp),
         # let's print it to help guide the user to the original text.
         match = re.search(timestamp_pattern, chunk)
@@ -87,7 +89,6 @@ def process_chunks(text, chunk_size, overlap):
         if match:
             tmp_response.append(match.group())
 
-        tmp_response = []
         errors_found = 0
         for line in raw_response.split('\n'):
             if '"key":' in line:
