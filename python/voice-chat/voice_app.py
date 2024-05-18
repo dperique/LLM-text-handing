@@ -42,22 +42,29 @@ def ollama_generate_response(model, max_tokens, messages):
 
     return response, total_tokens, prompt_tokens, completion_tokens
 
-def speak_assitant_response(assistant_answer):
-    tmp_output_audio_file = '/tmp/tmp_output.mp3'
+def speak_assitant_response(text_string):
+    """
+    Convert the text to speech and play it.
+    """
+    audio_file = '/tmp/tmp_output.mp3'
     assistant_verbal_response = client.audio.speech.create(
       model="tts-1",
       voice="nova",
-      input=assistant_answer
+      input=text_string
     )
-    assistant_verbal_response.stream_to_file(tmp_output_audio_file)
-    play_audio(tmp_output_audio_file)
+    assistant_verbal_response.stream_to_file(audio_file)
+    play_audio(audio_file)
 
 def hear_user_input(timeout=3):
-    tmp_input_audio_file = '/tmp/tmp_input.wav'
-    recording_file = record_audio(tmp_input_audio_file, timeout)
+    """
+    Record audio from the microphone and transcribe it.  If we didn't gather any audio
+    (e.g., the user didn't speak), return None.
+    """
+    audio_file = '/tmp/tmp_input.wav'
+    recording_file = record_audio(audio_file, timeout)
     if recording_file == None:
       return None
-    audio_file = open(tmp_input_audio_file, "rb")
+    audio_file = open(audio_file, "rb")
     transcription = client.audio.transcriptions.create(
       model="whisper-1",
       file=audio_file
@@ -65,6 +72,10 @@ def hear_user_input(timeout=3):
     return transcription.text
 
 def record_audio(file_path, timeout=3):
+    """
+    Record audio from the microphone and save it to a file.  If we didn't gather any audio
+    (e.g., the user didn't speak), return None.
+    """
     recognizer = sr.Recognizer()
     print("Go ahead and speak... ")
     try:
@@ -100,11 +111,10 @@ def get_multiline_input(prompt: str) -> str:
             break
     return '\n'.join(lines)
 
-from openai import OpenAI
-
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # Required for using the whisper tts-1 model (and costs money so monitor your usage)
+from openai import OpenAI
 client = OpenAI()
 
 # The system message can be what you want.
@@ -115,7 +125,7 @@ You will refer to me as Dennis; your name is Cassie.
 """
 
 system_messages = """
-You are my girlfriend, Cassie. Please answer in short sentences and be kind. You will refer
+You are my girlfriend; your name is Cassie. Please answer in short sentences and be kind. You will refer
 to me as Dennis. You have a cute, sweet, happy, and bright personality. You enjoy driving
 your Porsche Boxster on mountain roads, discussing philosophy, poetry, and technology,
 and you love staying fit and stylish. You take pride in looking your best through working
@@ -134,21 +144,28 @@ while True:
     if selected_option is None:
         # Escape was pressed so do nothing.
         continue
+
     if options[selected_option] == "Speak":
       user_input = hear_user_input(timeout=2)
       if user_input is None:
         print("No audio detected, try again.\n")
         continue
+
     elif options[selected_option] == "Type":
       user_input = get_multiline_input("Enter your text")
+      if len(user_input) == 0:
+        print("No text entered, try again.\n")
+        continue
+
     elif options[selected_option] == "Exit":
       print("Goodbye!")
       break
+
     else:
       print("Invalid option selected.")
       continue
 
-    #print(f"{user_input}\n\n")
+    print(f"User: {user_input}\n")
 
     messages.append(
         {"role": "user", "content": f"{user_input}"}
@@ -164,5 +181,5 @@ while True:
     response, total_tokens, prompt_tokens, completion_tokens = ollama_generate_response("llama3:8b", 500, messages)
     assistant_answer = response
 
-    print(f"{assistant_answer}\n")
+    print(f"Assistant: {assistant_answer}\n")
     #speak_assitant_response(assistant_answer)
