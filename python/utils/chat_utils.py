@@ -73,38 +73,18 @@ def hear_user_input(timeout: int = 3) -> str:
     # Remove the temporary WAV file after transcription
     return transcription.text
 
-def call_ollama_api(chunk, summary_prompt):
+def call_ollama_api(model, chunk, summary_prompt):
     messages = [
-        {"role": "system", "content": SUMMARY_PROMPT},
+        {"role": "system", "content": summary_prompt},
         {"role": "user", "content": f"{chunk}."},
     ]
 
     response, total_tokens, prompt_tokens, completion_tokens = ollama_generate_response(
-        model="llama3:8b",
+        model=model,
         max_tokens=500,
         messages=messages
     )
     # We only return the message content to match the original function's return type
-    return response.strip()
-
-# Function to call the Ollama API for summarization
-def call_ollama_api(chunk):
-    client = Client(host='http://localhost:11434')
-    messages = [
-        {"role": "system", "content": SUMMARY_PROMPT},
-        {"role": "user", "content": f"{chunk}."},
-    ]
-
-    try:
-        completion = client.chat(
-            model="llama3:8b",
-            messages=messages,
-            options={"temperature": 0.5}
-        )
-        response = completion['message']['content'].strip()
-    except Exception as e:
-        response = f"Error in ollama server: Error: {str(e)}"
-
     return response.strip()
 
 def ollama_generate_response(model: str, max_tokens: int, messages: List[Dict[str, str]]) -> Tuple[str, int, int, int]:
