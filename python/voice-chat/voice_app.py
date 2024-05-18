@@ -45,16 +45,31 @@ def ollama_generate_response(model, max_tokens, messages):
 
 def speak_assitant_response(text_string):
     """
-    Convert the text to speech and play it.
+    Convert the text to speech and play it using a temporary file.
     """
-    audio_file = '/tmp/tmp_output.mp3'
+    # Create a temporary file
+    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as temp_audio_file:
+        temp_audio_file_path = temp_audio_file.name
+
+    # Convert text to speech and save it to the temporary file
     assistant_verbal_response = client.audio.speech.create(
-      model="tts-1",
-      voice="nova",
-      input=text_string
+        model="tts-1",
+        voice="nova",
+        input=text_string
     )
-    assistant_verbal_response.stream_to_file(audio_file)
-    play_audio(audio_file)
+    assistant_verbal_response.stream_to_file(temp_audio_file_path)
+
+    # Initialize Pygame mixer and play the audio file
+    pygame.mixer.init()
+    pygame.mixer.music.load(temp_audio_file_path)
+    pygame.mixer.music.play()
+
+    # Wait until the audio is finished playing
+    while pygame.mixer.music.get_busy():
+        time.sleep(0.1)
+
+    # Remove the temporary file after playback
+    os.remove(temp_audio_file_path)
 
 def hear_user_input(timeout=3):
     """
@@ -82,15 +97,10 @@ def hear_user_input(timeout=3):
             model="whisper-1",
             file=wav_file
         )
-    return transcription.text
+    os.remove(temp_wav_file_path)
 
-def play_audio(file_path):
-    pygame.mixer.init()
-    pygame.mixer.music.load(file_path)
-    pygame.mixer.music.play()
-    # Wait until the audio is finished playing
-    while pygame.mixer.music.get_busy():
-        time.sleep(1)
+    # Remove the temporary WAV file after transcription
+    return transcription.text
 
 def get_multiline_input(prompt: str) -> str:
     """Get multiline input from the user."""
@@ -178,4 +188,4 @@ while True:
     assistant_answer = response
 
     print(f"Assistant: {assistant_answer}\n")
-    #speak_assitant_response(assistant_answer)
+    speak_assitant_response(assistant_answer)
