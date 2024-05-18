@@ -101,7 +101,7 @@ def process_chunks(text, chunk_size, overlap):
                     # If we can't parse the line as JSON, just append it as is
                     # to avoid losing data; we'll strip the key part to make it
                     # look like an almost legitimate bullet point.
-                    bullet_point = '* ' + line.split('"key":')[1].strip() + "Error: text repaired"
+                    bullet_point = '* ' + line.split('"key":')[1].strip()
                     tmp_response.append(bullet_point)
                     errors_found += 1
                     continue
