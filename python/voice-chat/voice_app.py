@@ -8,6 +8,7 @@
 # Goto system preferences on macos and allow terminal to use microphone.
 
 import os
+import tempfile
 import speech_recognition as sr
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import pygame
@@ -57,23 +58,7 @@ def speak_assitant_response(text_string):
 
 def hear_user_input(timeout=3):
     """
-    Record audio from the microphone and transcribe it.  If we didn't gather any audio
-    (e.g., the user didn't speak), return None.
-    """
-    audio_file = '/tmp/tmp_input.wav'
-    recording_file = record_audio(audio_file, timeout)
-    if recording_file == None:
-      return None
-    audio_file = open(audio_file, "rb")
-    transcription = client.audio.transcriptions.create(
-      model="whisper-1",
-      file=audio_file
-    )
-    return transcription.text
-
-def record_audio(file_path, timeout=3):
-    """
-    Record audio from the microphone and save it to a file.  If we didn't gather any audio
+    Record audio from the microphone and transcribe it. If we didn't gather any audio
     (e.g., the user didn't speak), return None.
     """
     recognizer = sr.Recognizer()
@@ -83,10 +68,21 @@ def record_audio(file_path, timeout=3):
             audio_data = recognizer.listen(source, timeout=timeout)
     except sr.WaitTimeoutError:
         return None
+
     print("Got it.\n")
-    with open(file_path, "wb") as audio_file:
-        audio_file.write(audio_data.get_wav_data())
-    return file_path
+
+    # Write audio data to a temporary WAV file
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_wav_file:
+        temp_wav_file.write(audio_data.get_wav_data())
+        temp_wav_file_path = temp_wav_file.name
+
+    # Open the temporary WAV file for reading
+    with open(temp_wav_file_path, "rb") as wav_file:
+        transcription = client.audio.transcriptions.create(
+            model="whisper-1",
+            file=wav_file
+        )
+    return transcription.text
 
 def play_audio(file_path):
     pygame.mixer.init()
