@@ -11,7 +11,6 @@ import re
 from ollama import Client
 
 # Constants
-CLIPBOARD_FILE = "/tmp/clipboard.txt"
 SUMMARY_PROMPT = """
 You are a summarization machine. I will give you text, you will summarize the text as
 a list of bullet points where each bullet point identifies any important points.
@@ -202,8 +201,6 @@ with st.sidebar:
                 st.session_state['word_size'] = sum([len(page.split(' ')) for page in text])
     elif input_type == "Clipboard":
         clipboard_text = pyperclip.paste()
-        with open(CLIPBOARD_FILE, "w") as file:
-            file.write(clipboard_text)
         text = clipboard_text
         st.session_state['text'] = [text]
         st.session_state['page_start'] = None
