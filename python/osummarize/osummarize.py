@@ -277,13 +277,14 @@ def process_chunks(input_file, output_file, chunk_size, overlap, max_width, doFo
 
 # Specify your input and output files
 if __name__ == "__main__":
-    if len(sys.argv) != 5:
+    if len(sys.argv) != 6:
         print(f"Usage: {sys.argv[0]} <input_file_prefix> <chunk_size> <formatMode> <stdOut>")
         print("\nParameters:")
         print("  <input_file_prefix>  Base name of the input file. The script uses this prefix to")
         print("                       find '<input_file_prefix>.txt' as the input file and")
         print("                       generates '<input_file_prefix>.md' as the output file.")
         print("                       Use 'clipboard' to summarize the contents of the clipboard.")
+        print("  <overlap>            overlap with previous chunk")
         print("  <chunk_size>         Number of lines to include in each chunk of the output.")
         print("                       Must be an integer.")
         print("  <formatMode>         Boolean flag ('True' or 'False'). If 'True', the output")
@@ -299,13 +300,19 @@ if __name__ == "__main__":
 
     input_file_prefix = sys.argv[1]
     chunk_size_arg = sys.argv[2]
-    doFormat = sys.argv[3]
-    stdoutMode = sys.argv[4]
+    overlap_arg = sys.argv[3]
+    doFormat = sys.argv[4]
+    stdoutMode = sys.argv[5]
 
     try:
         chunk_size = int(chunk_size_arg)
     except ValueError as e:
         print(f"The chunk size must be an integer: {str(e)}")
+        sys.exit(1)
+    try:
+        overlap_size = int(overlap_arg)
+    except ValueError as e:
+        print(f"The overlap must be an integer: {str(e)}")
         sys.exit(1)
 
     if doFormat == "True":
@@ -337,5 +344,5 @@ if __name__ == "__main__":
     if stdoutMode == "True":
         output_file = "to_stdout"
     print(f"Input file: {input_file}; output file: {output_file}")
-    print(f"Chunk size: {chunk_size}, overlap: 50, max width: 100, format: {doFormat}")
-    process_chunks(input_file, output_file, chunk_size=chunk_size, overlap=50, max_width=100, doFormat=doFormat)
+    print(f"Chunk size: {chunk_size}, overlap: {overlap_size}, max width: 100, format: {doFormat}")
+    process_chunks(input_file, output_file, chunk_size=chunk_size, overlap=overlap_size, max_width=100, doFormat=doFormat)
