@@ -69,3 +69,15 @@ Run it like this:
 export OPENAI_API_KEY=sk-... (fill in your API key)
 python/voice-chat/voice-chat.py
 ```
+
+## Type check during development
+
+We add [type hints](https://docs.python.org/3/library/typing.html) in the code so use this
+to ensure you comply:
+
+```bash
+mypy --install-types
+
+$ mypy python/sl_summarize/sl_osummary.py
+Success: no issues found in 1 source file
+```
