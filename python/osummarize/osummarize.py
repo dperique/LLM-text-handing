@@ -301,7 +301,7 @@ if __name__ == "__main__":
     input_file_prefix = sys.argv[1]
     chunk_size_arg = sys.argv[2]
     overlap_arg = sys.argv[3]
-    doFormat = sys.argv[4]
+    doFormat_arg = sys.argv[4]
     stdoutMode = sys.argv[5]
 
     try:
@@ -315,9 +315,9 @@ if __name__ == "__main__":
         print(f"The overlap must be an integer: {str(e)}")
         sys.exit(1)
 
-    if doFormat == "True":
+    if doFormat_arg == "True":
         doFormat = True
-    elif doFormat == "False":
+    elif doFormat_arg == "False":
         doFormat = False
     else:
         print("formatMode must be either True or False")

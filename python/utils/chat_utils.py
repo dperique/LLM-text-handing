@@ -248,7 +248,7 @@ def ollama_generate_response(model: str, max_tokens: int, messages: List[Dict[st
 
     return response, total_tokens, prompt_tokens, completion_tokens
 
-def get_multiline_input(prompt: str) -> List[str]:
+def get_multiline_input(prompt: str) -> str:
     """Get multiline input from the user."""
     print(f"{prompt}. Press control-d to finish.")
     lines = []
@@ -261,4 +261,4 @@ def get_multiline_input(prompt: str) -> List[str]:
             lines.append(line)
         except EOFError:
             break
-    return lines
+    return '\n'.join(lines)

@@ -19,6 +19,10 @@ export PYTHONPATH=$(pwd)/python
 
 Setup an [ollama service](https://github.com/ollama/ollama/blob/ba04afc9a45a095e09e72c1d716fdfe941d9b340/docs/linux.md#adding-ollama-as-a-startup-service-recommended) or get an openai apikey.
 
+NOTE: the summarizers support only ollama with `llama3:8b` for now; please ensure that your ollama API server
+is reachable at http://127.0.0.1:11434.  The focus was on a local API server since summarization tends to be
+something with sensitive data.
+
 ## Text summarizer
 
 Taking inspiration from [infiniteGPT](https://github.com/emmethalm/infiniteGPT) and other chunking methods (e.g., llama-index), we have a text summarizer that can use ollama or openai.  Use ollama for private summarization,
@@ -79,11 +83,26 @@ to ensure you comply:
 mypy --install-types ;# You only need to do this once in your venv
 ```
 
-Do this before committing to ensure you comply (only sl_osummary.py complies; the rest are TBD):
+Do this before committing to ensure you comply:
 
 ```bash
 $ mypy python/sl_summarize/sl_osummary.py
 Success: no issues found in 1 source file
+
+$ mypy python/reader/reader.py
+Success: no issues found in 1 source file
+
+$ mypy python/voice-chat/voice_app.py
+Success: no issues found in 1 source file
+
+$ mypy python/osummarize/osummarize.py
+Success: no issues found in 1 source file
+```
+
+or do this to check all in one command:
+
+```bash
+make lint
 ```
 
 If there are exceptions, update the [mypy.ini](./mypy.ini) file accordingly.  But please do so sparingly
