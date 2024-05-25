@@ -76,8 +76,15 @@ We add [type hints](https://docs.python.org/3/library/typing.html) in the code s
 to ensure you comply:
 
 ```bash
-mypy --install-types
+mypy --install-types ;# You only need to do this once in your venv
+```
 
+Do this before committing to ensure you comply (only sl_osummary.py complies; the rest are TBD):
+
+```bash
 $ mypy python/sl_summarize/sl_osummary.py
 Success: no issues found in 1 source file
 ```
+
+If there are exceptions, update the [mypy.ini](./mypy.ini) file accordingly.  But please do so sparingly
+as we want to take advantage of typing checking as much as we can.

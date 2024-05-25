@@ -32,6 +32,18 @@ if 'page_end' not in st.session_state:
 if 'word_size' not in st.session_state:
     st.session_state['word_size'] = 0
 
+# Track the chunksize and overlap values so that we can be dynamic since
+# text sizes change and we want to give the user reasonable defaults if
+# we can figure them out for them.
+initial_chunk_size: int = 500
+initial_overlap_size: int = 50
+
+if 'chunk_size_value' not in st.session_state:
+    st.session_state['chunk_size_value'] = initial_chunk_size
+
+if 'overlap_size_value' not in st.session_state:
+    st.session_state['overlap_value'] = initial_overlap_size
+
 with st.sidebar:
     st.title("Summary Co-Pilot")
     input_type: str | None = st.radio("Select input type:", ("File", "Clipboard", "Scrape URL to clipboard"))
@@ -94,9 +106,19 @@ with st.sidebar:
             except requests.exceptions.RequestException as e:
                 st.error(f"Error fetching the URL: {e}")
 
+    if st.session_state['word_size'] < st.session_state['chunk_size_value']:
+        # If the clipboard text is less than the chunk size, shrink the chunk and overlap
+        # values that make more sense.
+        st.session_state['chunk_size_value'] = st.session_state['word_size']
+        st.session_state['overlap_value'] = int(st.session_state['chunk_size_value'] * .20)
+    else:
+        # Reset the chunk and overlap values to the initial values if
+        # the clipboard text changes to something larger.
+        st.session_state['chunk_size_value'] = initial_chunk_size
+        st.session_state['overlap_value'] = initial_overlap_size
     st.text(f"Word Size: {st.session_state['word_size']}")
-    chunk_size: int = st.slider("Chunk Size", min_value=100, max_value=1000, value=500)
-    overlap: int = st.slider("Overlap", min_value=0, max_value=chunk_size-1, value=50)
+    chunk_size: int = st.slider("Chunk Size", min_value=100, max_value=1000, value=st.session_state['chunk_size_value'])
+    overlap: int = st.slider("Overlap", min_value=0, max_value=chunk_size-1, value=st.session_state['overlap_value'])
 
     # Search dialog for regex pattern
     regex_pattern: str = st.sidebar.text_input("Enter regex pattern to highlight")
