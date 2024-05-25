@@ -43,7 +43,7 @@ while True:
 
     if options[selected_option] == "Speak":
       user_input = hear_user_input(timeout=2)
-      if user_input is None:
+      if user_input is "":
         print("No audio detected, try again.\n")
         continue
 

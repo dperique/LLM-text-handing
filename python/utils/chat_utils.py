@@ -171,7 +171,7 @@ def speak_assitant_response(text_input: str) -> None:
 def hear_user_input(timeout: int = 3) -> str:
     """
     Record audio from the microphone and transcribe it. If we didn't gather any audio
-    (e.g., the user didn't speak), return None.
+    (e.g., the user didn't speak), return "".
     Assumes OPENAI_API_KEY is set in the environment.
     """
     import os
@@ -185,7 +185,7 @@ def hear_user_input(timeout: int = 3) -> str:
         with sr.Microphone() as source:
             audio_data = recognizer.listen(source, timeout=timeout)
     except sr.WaitTimeoutError:
-        return None
+        return ""
 
     print("Got it.\n")
 
@@ -261,4 +261,4 @@ def get_multiline_input(prompt: str) -> List[str]:
             lines.append(line)
         except EOFError:
             break
-    return '\n'.join(lines)
+    return lines
