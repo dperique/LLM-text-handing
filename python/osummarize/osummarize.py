@@ -53,26 +53,6 @@ be on separate lines.  For example, the output will look like:
 The key and bullet point should always be on a single line.
 """
 
-# Change your OpenAI chat model accordingly
-
-def call_openai_api(chunk):
-    # Add your own OpenAI API key
-
-    import openai
-    openai.api_key = "sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "PASS IN ANY ARBITRARY SYSTEM VALUE TO GIVE THE AI AN IDENITY"},
-            {"role": "user", "content": f"YOUR DATA TO PASS IN: {chunk}."},
-        ],
-        max_tokens=500,
-        n=1,
-        stop=None,
-        temperature=0.5,
-    )
-    return response.choices[0]['message']['content'].strip()
 
 def split_into_chunks(text, chunk_size, overlap):
 

@@ -205,7 +205,22 @@ def hear_user_input(timeout: int = 3) -> str:
     # Remove the temporary WAV file after transcription
     return transcription.text
 
-def call_ollama_api(chunk, summary_prompt):
+def call_openai_api(chunk, summary_prompt) -> str:
+    return "DO NOT USE YET!"
+    messages = [
+        {"role": "system", "content": summary_prompt},
+        {"role": "user", "content": f"{chunk}."},
+    ]
+
+    response, total_tokens, prompt_tokens, completion_tokens = openai_generate_response(
+        model="gpt-3.5-turbo",
+        max_tokens=500,
+        messages=messages
+    )
+    # We only return the message content to match the original function's return type
+    return response.strip()
+
+def call_ollama_api(chunk, summary_prompt) -> str:
     messages = [
         {"role": "system", "content": summary_prompt},
         {"role": "user", "content": f"{chunk}."},
@@ -247,6 +262,31 @@ def ollama_generate_response(model: str, max_tokens: int, messages: List[Dict[st
     total_tokens = prompt_tokens + completion_tokens
 
     return response, total_tokens, prompt_tokens, completion_tokens
+
+def openai_generate_response(model: str, max_tokens: int, messages: List[Dict[str, str]]) -> Tuple[str, int, int, int]:
+    return "DO NOT USE YET!", 0, 0, 0
+    """
+    Generate a response from the Openai API using the specified model and messages.
+    """
+    import openai
+    openai.api_key = "sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+
+    try:
+        completion = openai.ChatCompletion.create(
+            model=model,
+            messages=messages,
+            max_tokens=max_tokens,
+            n=1,
+            stop=None,
+            temperature=0.5,
+        )
+        response = completion.choices[0]['message']['content'].strip()
+    except Exception as e:
+        error_text = f"Error in OpenAI API: Error: {str(e)}"
+        response = error_text
+        return response, 0, 0, 0
+
+    return response, completion.total_tokens, completion.prompt_tokens, completion.completion_tokens
 
 def get_multiline_input(prompt: str) -> str:
     """Get multiline input from the user."""
