@@ -117,7 +117,11 @@ with st.sidebar:
         st.session_state['chunk_size_value'] = initial_chunk_size
         st.session_state['overlap_value'] = initial_overlap_size
     st.text(f"Word Size: {st.session_state['word_size']}")
-    chunk_size: int = st.slider("Chunk Size", min_value=100, max_value=1000, value=st.session_state['chunk_size_value'])
+
+    #chunk_size_min = min(st.session_state['word_size'], 100)
+    #chunk_size_max = max(st.session_state['word_size'], 1000)
+    chunk_size: int = st.slider("Chunk Size", min_value=0, max_value=1000, value=st.session_state['chunk_size_value'])
+
     overlap: int = st.slider("Overlap", min_value=0, max_value=chunk_size-1, value=st.session_state['overlap_value'])
 
     # Search dialog for regex pattern
