@@ -123,4 +123,7 @@ wcwidth==0.2.13
 wrapt==1.16.0
 wsproto==1.2.0
 yarl==1.9.4
+streamlit
+requests
+mypy
 types-requests
